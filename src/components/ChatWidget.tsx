@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { classes, memberships, trialSlots } from "@/lib/data";
+import { useBusiness } from "@/lib/business-context";
 import { useLeads } from "@/lib/leads-context";
 
 type Role = "ai" | "user";
@@ -13,9 +13,6 @@ type Message = {
   text: string;
 };
 
-const GREETING =
-  "Hi! I'm Iron Village's AI assistant. Ask me about classes, pricing, or book a free trial!";
-
 function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -24,37 +21,24 @@ function typingMs() {
   return 600 + Math.floor(Math.random() * 600);
 }
 
-function pricingReply() {
-  const lines = memberships.map(
-    (t) => `• ${t.name} — $${t.price}${t.period}${t.highlight ? " (most popular)" : ""}`,
-  );
-  return `Here's what membership looks like at Iron Village:\n${lines.join("\n")}\n\nWant me to book you a free trial class?`;
-}
-
-function scheduleReply() {
-  const lines = classes.slice(0, 5).map((c) => `• ${c.name} — ${c.day} at ${c.time} (${c.coach})`);
-  return `This week's classes:\n${lines.join("\n")}\n\nI can lock in a free trial at one of those times.`;
-}
-
 function looksLikeBooking(text: string) {
-  return /(book|trial|sign up|signup|join|free class)/i.test(text);
+  return /(book|trial|appointment|consult|service|quote|schedule|sign up|signup|join)/i.test(text);
 }
 
 function looksLikePricing(text: string) {
-  return /(price|pricing|cost|membership|how much|plan|tier)/i.test(text);
+  return /(price|pricing|cost|membership|service plan|how much|plan|tier|monthly)/i.test(text);
 }
 
 function looksLikeSchedule(text: string) {
-  return /(class|schedule|when|times?|hiit|spin|lift|workout)/i.test(text);
+  return /(schedule|hours|when|times?|availability|class|service window|slot|appointment)/i.test(text);
 }
 
 export function ChatWidget() {
+  const { business } = useBusiness();
   const { addLead } = useLeads();
   const [open, setOpen] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: "g", role: "ai", text: GREETING },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => [{ id: "g", role: "ai", text: business.chat.greeting }]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [step, setStep] = useState<BookingStep>("idle");
@@ -74,15 +58,15 @@ export function ChatWidget() {
 
   useEffect(() => {
     const openChat = () => setOpen(true);
-    window.addEventListener("fitflow-open-chat", openChat);
-    return () => window.removeEventListener("fitflow-open-chat", openChat);
+    window.addEventListener("closecove-open-chat", openChat);
+    return () => window.removeEventListener("closecove-open-chat", openChat);
   }, []);
 
   const chips = useMemo(() => {
-    if (step === "time") return trialSlots;
-    if (step === "idle") return ["Pricing", "Class times", "Book a free trial"];
+    if (step === "time") return business.trialSlots;
+    if (step === "idle") return ["Pricing", "Availability", "Book a service"];
     return [];
-  }, [step]);
+  }, [business.trialSlots, step]);
 
   async function pushAi(text: string) {
     setTyping(true);
@@ -104,9 +88,7 @@ export function ChatWidget() {
     if (current === "phone") {
       draft.current.phone = text;
       go("time");
-      await pushAi(
-        `Got it. Pick a trial slot (or type your own):\n${trialSlots.map((s, i) => `${i + 1}. ${s}`).join("\n")}`,
-      );
+      await pushAi(`Got it. Pick a time slot (or type your own):\n${business.trialSlots.map((s, i) => `${i + 1}. ${s}`).join("\n")}`);
       return;
     }
     if (current === "time") {
@@ -118,28 +100,24 @@ export function ChatWidget() {
         preferredTime: draft.current.time,
         source: "Website chat",
       });
-      await pushAi(
-        `You're booked, ${draft.current.name.split(" ")[0]}! ✅\n\n${draft.current.time}\nWe'll text ${draft.current.phone} with check-in details.\n\nThis lead is now on the owner dashboard.`,
-      );
+      await pushAi(`You’re booked, ${draft.current.name.split(" ")[0]}! ✅\n\n${draft.current.time}\nWe’ll text ${draft.current.phone} with confirmation details.\n\nThis lead is now on the owner dashboard.`);
       return;
     }
 
     if (looksLikeBooking(text)) {
       go("name");
-      await pushAi("Let's get you in for a free trial. What's your name?");
+      await pushAi(`Let's get you booked. What's your name?`);
       return;
     }
     if (looksLikePricing(text)) {
-      await pushAi(pricingReply());
+      await pushAi(business.chat.pricingReply);
       return;
     }
     if (looksLikeSchedule(text)) {
-      await pushAi(scheduleReply());
+      await pushAi(business.chat.scheduleReply);
       return;
     }
-    await pushAi(
-      "I can help with membership pricing, this week's class schedule, or booking a free trial. What do you want to do?",
-    );
+    await pushAi(business.chat.fallback);
   }
 
   async function handleUserText(raw: string) {
@@ -162,7 +140,7 @@ export function ChatWidget() {
         <div className="animate-fade-up flex h-[520px] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl border border-line bg-ink-2 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
           <header className="flex items-center justify-between bg-ember px-4 py-3 text-ink">
             <div>
-              <p className="font-display text-sm tracking-wide uppercase">Iron Village AI</p>
+              <p className="font-display text-sm tracking-wide uppercase">{business.name}</p>
               <p className="text-xs opacity-80">Usually replies instantly</p>
             </div>
             <button
@@ -175,19 +153,12 @@ export function ChatWidget() {
             </button>
           </header>
 
-          <div
-            ref={scroller}
-            role="log"
-            aria-live="polite"
-            className="flex-1 space-y-3 overflow-y-auto px-3 py-3"
-          >
+          <div ref={scroller} role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "rounded-br-sm bg-ember text-ink"
-                      : "rounded-bl-sm bg-card text-sand"
+                    msg.role === "user" ? "rounded-br-sm bg-ember text-ink" : "rounded-bl-sm bg-card text-sand"
                   }`}
                 >
                   {msg.text}
@@ -195,7 +166,7 @@ export function ChatWidget() {
               </div>
             ))}
             {typing && (
-              <div className="dot-typing flex gap-1 rounded-2xl bg-card px-3 py-2 w-fit">
+              <div className="dot-typing flex w-fit gap-1 rounded-2xl bg-card px-3 py-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-mute" />
                 <span className="h-1.5 w-1.5 rounded-full bg-mute" />
                 <span className="h-1.5 w-1.5 rounded-full bg-mute" />
@@ -228,13 +199,10 @@ export function ChatWidget() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about classes or trials…"
+              placeholder="Ask about services or availability…"
               className="flex-1 rounded-full border border-line bg-card px-3 py-2 text-sm outline-none placeholder:text-mute focus:border-ember"
             />
-            <button
-              type="submit"
-              className="rounded-full bg-ember px-3 py-2 text-sm font-semibold text-ink"
-            >
+            <button type="submit" className="rounded-full bg-ember px-3 py-2 text-sm font-semibold text-ink">
               Send
             </button>
           </form>

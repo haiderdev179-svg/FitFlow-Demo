@@ -13,7 +13,7 @@ export function OpenChatButton({
     <button
       type="button"
       className={className}
-      onClick={() => window.dispatchEvent(new Event("fitflow-open-chat"))}
+      onClick={() => window.dispatchEvent(new Event("closecove-open-chat"))}
     >
       {children}
     </button>
