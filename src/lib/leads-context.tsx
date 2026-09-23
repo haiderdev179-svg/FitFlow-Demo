@@ -28,23 +28,25 @@ export function LeadsProvider({ children }: { children: ReactNode }) {
     ) as Record<BusinessType, Lead[]>,
   );
 
-  const leads = leadBuckets[industry] ?? business.seedLeads;
+  const activeBusiness = business ?? businessProfiles.other;
+  const activeIndustry = industry ?? "other";
+  const leads = leadBuckets[activeIndustry] ?? activeBusiness.seedLeads;
 
   const addLead = useCallback(
     (lead: Omit<Lead, "id" | "createdAt">) => {
       setLeadBuckets((prev) => ({
         ...prev,
-        [industry]: [
+        [activeIndustry]: [
           {
             ...lead,
             id: `live-${Date.now()}`,
             createdAt: formatNow(),
           },
-          ...(prev[industry] ?? business.seedLeads),
+          ...(prev[activeIndustry] ?? activeBusiness.seedLeads),
         ],
       }));
     },
-    [business.seedLeads, industry],
+    [activeBusiness.seedLeads, activeIndustry],
   );
 
   const value = useMemo<LeadsContextValue>(

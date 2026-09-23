@@ -13,6 +13,15 @@ type Message = {
   text: string;
 };
 
+const chipMap: Record<string, string[]> = {
+  fitness: ["Pricing", "Class Schedule", "Book a Trial"],
+  "home-services": ["Get a Quote", "Service Availability", "Book a Visit"],
+  "pet-care": ["Services", "Availability", "Book a Visit"],
+  "salon-spa": ["Services", "Pricing", "Availability", "Book a Service"],
+  "professional-services": ["Services", "Consultation", "Availability"],
+  other: ["Ask a Question", "Availability", "Get Started"],
+};
+
 function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -38,7 +47,7 @@ export function ChatWidget() {
   const { addLead } = useLeads();
   const [open, setOpen] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<Message[]>(() => [{ id: "g", role: "ai", text: business.chat.greeting }]);
+  const [messages, setMessages] = useState<Message[]>(() => [{ id: "g", role: "ai", text: "" }]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [step, setStep] = useState<BookingStep>("idle");
@@ -53,6 +62,17 @@ export function ChatWidget() {
   }
 
   useEffect(() => {
+    setMessages([{ id: `g-${business.id}`, role: "ai", text: business.chat.greeting }]);
+    setInput("");
+    setTyping(false);
+    setStep("idle");
+    stepRef.current = "idle";
+    draft.current = { name: "", phone: "", time: "" };
+    queue.current = [];
+    processing.current = false;
+  }, [business.id, business.chat.greeting]);
+
+  useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
 
@@ -64,9 +84,9 @@ export function ChatWidget() {
 
   const chips = useMemo(() => {
     if (step === "time") return business.trialSlots;
-    if (step === "idle") return ["Pricing", "Availability", "Book a service"];
+    if (step === "idle") return chipMap[business.id] ?? ["Pricing", "Availability", "Book a service"];
     return [];
-  }, [business.trialSlots, step]);
+  }, [business.id, business.trialSlots, step]);
 
   async function pushAi(text: string) {
     setTyping(true);
@@ -106,7 +126,7 @@ export function ChatWidget() {
 
     if (looksLikeBooking(text)) {
       go("name");
-      await pushAi(`Let's get you booked. What's your name?`);
+      await pushAi(`Let’s get you booked. What’s your name?`);
       return;
     }
     if (looksLikePricing(text)) {
@@ -137,28 +157,33 @@ export function ChatWidget() {
   return (
     <div className="fixed right-4 bottom-4 z-40 flex flex-col items-end gap-3">
       {open && (
-        <div className="animate-fade-up flex h-[520px] w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-2xl border border-line bg-ink-2 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
-          <header className="flex items-center justify-between bg-ember px-4 py-3 text-ink">
+        <div className="animate-fade-up flex h-[440px] w-[min(100vw-1.5rem,360px)] origin-bottom-right flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-[linear-gradient(180deg,#f7f9fc_0%,#edf3fb_100%)] shadow-[0_26px_64px_rgba(13,23,40,0.18)] ring-1 ring-white/70 transition-all duration-300 ease-out">
+          <header className="flex items-center justify-between bg-[#0d1728] px-4 py-3 text-slate-100 ring-1 ring-inset ring-white/8">
             <div>
-              <p className="font-display text-sm tracking-wide uppercase">{business.name}</p>
-              <p className="text-xs opacity-80">Usually replies instantly</p>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#ff8c5c] shadow-[0_0_12px_rgba(255,140,92,0.8)]" aria-hidden />
+                <p className="font-display text-[10px] tracking-[0.2em] uppercase text-white">CloseCove</p>
+              </div>
+              <p className="mt-1 text-[11px] text-slate-300">Usually replies instantly</p>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-full px-2 text-lg leading-none"
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-lg leading-none text-slate-100 transition hover:border-white/15 hover:bg-white/10"
               aria-label="Close chat"
             >
               ×
             </button>
           </header>
 
-          <div ref={scroller} role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
+          <div ref={scroller} role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto bg-[linear-gradient(180deg,#eef4fb_0%,#edf3fa_100%)] px-3 py-3">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm leading-relaxed ${
-                    msg.role === "user" ? "rounded-br-sm bg-ember text-ink" : "rounded-bl-sm bg-card text-sand"
+                  className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm leading-relaxed transition-all duration-200 ${
+                    msg.role === "user"
+                      ? "rounded-br-sm bg-white text-slate-800 shadow-[0_10px_20px_rgba(15,23,42,0.06)]"
+                      : "rounded-bl-sm bg-[#dfeaf7] text-slate-700 ring-1 ring-slate-200"
                   }`}
                 >
                   {msg.text}
@@ -166,22 +191,22 @@ export function ChatWidget() {
               </div>
             ))}
             {typing && (
-              <div className="dot-typing flex w-fit gap-1 rounded-2xl bg-card px-3 py-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-mute" />
-                <span className="h-1.5 w-1.5 rounded-full bg-mute" />
-                <span className="h-1.5 w-1.5 rounded-full bg-mute" />
+              <div className="dot-typing flex w-fit gap-1 rounded-2xl bg-white px-3 py-2 ring-1 ring-slate-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
               </div>
             )}
           </div>
 
           {chips.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 border-t border-line px-3 py-2">
+            <div className="flex flex-wrap gap-1.5 border-t border-slate-200 bg-white/60 px-3 py-2.5">
               {chips.map((chip) => (
                 <button
                   key={chip}
                   type="button"
                   onClick={() => handleUserText(chip)}
-                  className="rounded-full border border-line bg-card px-2.5 py-1 text-[11px] text-sand hover:border-ember"
+                  className="rounded-full border border-slate-200 bg-[#f8fafc] px-2.5 py-1 text-[11px] font-medium text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff8a5b] hover:text-slate-900"
                 >
                   {chip}
                 </button>
@@ -190,7 +215,7 @@ export function ChatWidget() {
           )}
 
           <form
-            className="flex gap-2 border-t border-line p-3"
+            className="flex gap-2 border-t border-slate-200 bg-white/70 p-3"
             onSubmit={(e) => {
               e.preventDefault();
               void handleUserText(input);
@@ -200,9 +225,9 @@ export function ChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about services or availability…"
-              className="flex-1 rounded-full border border-line bg-card px-3 py-2 text-sm outline-none placeholder:text-mute focus:border-ember"
+              className="flex-1 rounded-full border border-slate-200 bg-[#f8fafc] px-3 py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400 transition focus:border-[#ff8a5b] focus:bg-white"
             />
-            <button type="submit" className="rounded-full bg-ember px-3 py-2 text-sm font-semibold text-ink">
+            <button type="submit" className="rounded-full bg-[#ff7a45] px-3 py-2 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(255,122,69,0.2)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#f66e3d] active:translate-y-0">
               Send
             </button>
           </form>
@@ -212,13 +237,13 @@ export function ChatWidget() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-ember text-ink shadow-lg shadow-ember/30 transition hover:bg-ember-2"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-[#ff7a45] text-white shadow-[0_18px_32px_rgba(255,122,69,0.28)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#f66e3d] active:translate-y-0"
         aria-label="Open AI chat"
       >
         {open ? (
           <span className="text-2xl leading-none">×</span>
         ) : (
-          <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M4 12a8 8 0 0 1 8-8h0a8 8 0 0 1 8 8v5a3 3 0 0 1-3 3H9l-5 3v-8Z" />
           </svg>
         )}

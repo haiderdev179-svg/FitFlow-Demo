@@ -200,7 +200,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
   },
   "home-services": {
     id: "home-services",
-    name: "Ferris HVAC & Air",
+    name: "Apex Home Services",
     tagline: "Comfort that shows up on time.",
     city: "Phoenix, AZ",
     phone: "(602) 555-0186",
@@ -279,7 +279,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
       messageFooter: "Replied · booked Thursday maintenance visit · Follow-up sent ✅",
     },
     chat: {
-      greeting: "Hi! I'm Ferris Comfort AI. Need an emergency repair, a tune-up, or a quote for a new system?",
+      greeting: "Hi! I'm Apex Home Services AI. I can help collect the job details and get you scheduled.",
       pricingReply: "Here are our service plans:\n• Comfort Care — $79/mo\n• HomeShield Plus — $149/mo (most popular)\n• Commercial Essentials — $249/mo\n\nWant me to help you book a tune-up or a same-day service call?",
       scheduleReply: "This week's service windows:\n• AC Performance Check — Mon / Thu at 8:00 AM (Alex)\n• Furnace Tune-Up — Tue / Fri at 10:00 AM (Renee)\n• Mini-Split Inspection — Wed at 1:30 PM (Drew)\n• Emergency Service — Daily on-call\n\nI can help you book the best time for your home.",
       fallback: "I can help with emergency cooling issues, seasonal maintenance, or booking a service visit. What are you looking for?",
@@ -366,7 +366,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
       messageFooter: "Replied · booked Thursday de-shedding · Follow-up sent ✅",
     },
     chat: {
-      greeting: "Hi! I'm Whisker & Wag AI. Need a bath, grooming, boarding, or daycare for your pet?",
+      greeting: "Hi! I'm Paws & Co. Pet Care AI. I can help with grooming, boarding availability, and booking your pet's next visit.",
       pricingReply: "Here are our care packages:\n• Fresh & Fluffy — $45/visit\n• Signature Groom — $85/visit (most popular)\n• Board & Play — $55/night\n\nWant me to help you choose the right service for your pup?",
       scheduleReply: "Our appointment windows:\n• Puppy Bath & Brush — Mon / Thu at 9:00 AM (Lena)\n• De-Shedding Session — Tue / Sat at 11:00 AM (Harper)\n• Boarding Intake — Wed / Fri at 2:00 PM (Milo)\n• Luxury Spa Groom — Thu at 4:00 PM (Jules)\n\nI can book the best slot for your pet.",
       fallback: "I can help with grooming, boarding, de-shedding, or daycare scheduling. What does your pet need?",
@@ -453,7 +453,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
       messageFooter: "Replied · booked Thursday gloss refresh · Re-engaged ✅",
     },
     chat: {
-      greeting: "Hi! I'm Lumen AI. Need a fresh cut, a color refresh, a facial, or a spa treatment?",
+      greeting: "Hi! I'm Lumen AI. I can help you choose a service, check availability, and book your next appointment.",
       pricingReply: "Here are our signature services:\n• Fresh Cut — $65/service\n• Color Refresh — $140/service (most popular)\n• Luxe Ritual — $210/service\n\nWant me to help you choose the right treatment for your next visit?",
       scheduleReply: "This week's availability:\n• Precision Cut — Tue / Fri at 10:00 AM (Ava)\n• Balayage Refresh — Wed / Sat at 1:00 PM (Noah)\n• Glow Facial — Thu at 2:30 PM (Sana)\n• Signature Blowout — Daily at 4:00 PM (Mila)\n\nI can book a time that matches your schedule.",
       fallback: "I can help with hair services, color touch-ups, facial treatments, or bridal styling. What are you looking for?",
@@ -461,7 +461,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
   },
   "professional-services": {
     id: "professional-services",
-    name: "Halbrook & Reyes Law",
+    name: "Northstar Legal & Advisory",
     tagline: "Clear counsel. Calm guidance.",
     city: "Seattle, WA",
     phone: "(206) 555-0139",
@@ -540,7 +540,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
       messageFooter: "Replied · booked Thursday strategy call · Follow-up complete ✅",
     },
     chat: {
-      greeting: "Hi! I'm Halbrook & Reyes AI. Need help with a business issue, estate planning, or employment matter?",
+      greeting: "Hi! I'm Northstar AI. I can collect a few details about your request and help schedule an initial consultation.",
       pricingReply: "Here are our counsel options:\n• Consultation — $175/session\n• Business Counsel — $650/month (most popular)\n• Retainer — $1,200/month\n\nWant me to help you book a consultation or review a matter?",
       scheduleReply: "Our consultation windows:\n• Case Intake — Mon / Thu at 9:30 AM (Elise)\n• Contract Review — Tue / Fri at 11:00 AM (Damon)\n• Estate Planning — Wed at 2:00 PM (Ariana)\n• Employment Consultation — Thu at 4:30 PM (Shane)\n\nI can help you arrange the right time for your case.",
       fallback: "I can help with case intake, contract review, estate planning, or employment guidance. Tell me what you need help with.",
@@ -548,7 +548,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
   },
   other: {
     id: "other",
-    name: "Harbor & Pine Service Co.",
+    name: "CloseCove Custom Workflow",
     tagline: "Reliable service. Honest work. No surprises.",
     city: "Portland, OR",
     phone: "(503) 555-0173",
@@ -627,7 +627,7 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
       messageFooter: "Replied · booked seasonal tune-up · Follow-up sent ✅",
     },
     chat: {
-      greeting: "Hi! I'm Harbor & Pine AI. Need a repair, maintenance visit, or a quote for a new installation?",
+      greeting: "Hi! I’m your CloseCove AI assistant. I can help answer questions, qualify new inquiries, and guide customers toward the next step.",
       pricingReply: "Here are our service options:\n• Quick Fix — $95/visit\n• Priority Care — $169/month (most popular)\n• Maintenance Plus — $260/month\n\nWant me to help you schedule a repair or a maintenance check?",
       scheduleReply: "Service availability:\n• Repair Visit — Mon / Thu at 9:00 AM (Jesse)\n• Water Heater Check — Tue / Fri at 11:30 AM (Lola)\n• Seasonal Tune-Up — Wed at 1:00 PM (Sam)\n• Install Consultation — Sat at 10:00 AM (Pia)\n\nI can book the right visit for your property.",
       fallback: "I can help with repairs, seasonal maintenance, or new installation consultations. What kind of service do you need?",
